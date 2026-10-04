@@ -8,8 +8,8 @@ def validate_image_manifest(manifest: pd.DataFrame, image_root: str | Path):
     if manifest["filename"].isna().any() or manifest["label"].isna().any(): raise ValueError("Null filename or label")
     invalid=set(manifest["label"].astype(str))-VALID_LABELS
     if invalid: raise ValueError(f"Unknown labels: {sorted(invalid)}")
-    root=Path(image_root)
-    missing=[name for name in manifest["filename"].astype(str) if not (root/name).is_file()]
+    if manifest["filename"].astype(str).str.contains(r"[/\\]",regex=True).any(): raise ValueError("Filenames must be simple names within image_root")
+    missing=[name for name in manifest["filename"].astype(str) if not (Path(image_root)/name).is_file()]
     if missing: raise FileNotFoundError(f"Missing image files: {missing[:5]}")
     if manifest["filename"].duplicated().any(): raise ValueError("Duplicate image filenames")
     return {"rows":len(manifest),"class_counts":manifest["label"].value_counts().to_dict(),"missing":0}

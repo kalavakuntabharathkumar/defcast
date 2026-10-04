@@ -18,6 +18,9 @@ def test_bad_label_rejected(tmp_path):
     path=make_data(tmp_path,count=4); frame=pd.read_csv(path); frame.loc[0,'label']='unknown'
     with pytest.raises(ValueError): validate_image_manifest(frame,tmp_path)
 
+def test_path_traversal_rejected(tmp_path):
+    with pytest.raises(ValueError): validate_image_manifest(pd.DataFrame({'filename':['../secret.png'],'label':['normal']}),tmp_path)
+
 def test_negative_demand_rejected():
     with pytest.raises(ValueError): validate_demand_frame(pd.DataFrame({'date':['2025-01-01'],'demand':[-1]}))
 
